@@ -166,7 +166,7 @@ Không muốn phụ thuộc 1 máy tính? Crawler chạy trên **GitHub Actions*
 
 1. Tạo **GitHub PAT** (Settings → Developer settings → Personal access tokens, scope `repo`).
 2. Thêm vào **Vercel env** (và `web/.env.local` khi chạy local):
-   - `GITHUB_REPO` = `10k3dBOH/BOHdata`
+   - `GITHUB_REPO` = `10k3dai-droid/BOHdata`
    - `GITHUB_DISPATCH_TOKEN` = PAT vừa tạo
 3. Xong: mỗi lần bấm "Tìm ASIN top", web tạo job **và** bắn `repository_dispatch` → GitHub Actions chạy crawler → kết quả tự hiện. Không đụng tới PC.
 
