@@ -1,0 +1,5 @@
+{
+  "// note": "Tắt tự động kích hoạt Python venv trong terminal — tránh làm gián đoạn 'next dev' của web.",
+  "python.terminal.activateEnvironment": false,
+  "python.defaultInterpreterPath": "${workspaceFolder}/crawler/.venv/Scripts/python.exe"
+}
