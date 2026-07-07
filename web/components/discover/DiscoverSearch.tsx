@@ -78,10 +78,19 @@ export function DiscoverSearch({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? "Tạo job thất bại.");
-      setStatus({
-        ok: true,
-        msg: "Đã tạo job (pending). Chạy `python main.py --only-discover` để crawler tìm & trả kết quả bên dưới.",
-      });
+
+      // Thông báo theo trạng thái kích hoạt crawler cloud (GitHub Actions).
+      const d = json?.dispatch;
+      let msg: string;
+      if (d?.ok) {
+        msg = "✅ Đã tạo job & kích hoạt crawler cloud (GitHub Actions). Kết quả sẽ hiện bên dưới sau vài phút.";
+      } else if (d?.configured) {
+        msg = `Đã tạo job nhưng kích hoạt cloud lỗi (${d.error ?? "?"}). Vào GitHub → Actions → Run workflow "Run discover".`;
+      } else {
+        msg =
+          "Đã tạo job (pending). Chạy crawler để lấy kết quả: GitHub Actions → 'Run discover' → Run workflow, hoặc local `python main.py --only-discover`.";
+      }
+      setStatus({ ok: true, msg });
       onSubmitted();
     } catch (err) {
       setStatus({ ok: false, msg: err instanceof Error ? err.message : "Lỗi không xác định" });

@@ -151,6 +151,29 @@ Task Scheduler → Create Task → Trigger *Daily 07:00* (giờ máy VN) → Act
 
 ---
 
+## 7b. Chạy 100% trên cloud (không cần PC) — GitHub Actions
+
+Không muốn phụ thuộc 1 máy tính? Crawler chạy trên **GitHub Actions** (miễn phí, có sẵn file trong `.github/workflows/`):
+
+1. Push repo lên GitHub.
+2. Repo → **Settings → Secrets and variables → Actions** → thêm 3 secret: `KEEPA_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
+3. **Daily crawl** (`daily-crawl.yml`): tự chạy 00:00 UTC = 07:00 VN mỗi ngày (snapshot toàn bộ ASIN + discover job pending). Chạy tay: tab **Actions → Daily crawl → Run workflow**.
+4. **Run discover** (`discover.yml`): chạy các discover job pending. Kích hoạt bằng tab Actions, hoặc **tự động từ web** (xem dưới).
+
+### Bấm "Tìm" trên web → crawler cloud chạy ngay (repository_dispatch)
+
+Để web (Vercel) tự kích hoạt discover trên cloud:
+
+1. Tạo **GitHub PAT** (Settings → Developer settings → Personal access tokens, scope `repo`).
+2. Thêm vào **Vercel env** (và `web/.env.local` khi chạy local):
+   - `GITHUB_REPO` = `10k3dBOH/BOHdata`
+   - `GITHUB_DISPATCH_TOKEN` = PAT vừa tạo
+3. Xong: mỗi lần bấm "Tìm ASIN top", web tạo job **và** bắn `repository_dispatch` → GitHub Actions chạy crawler → kết quả tự hiện. Không đụng tới PC.
+
+> Nếu KHÔNG cấu hình 2 biến này, web vẫn tạo job bình thường; bạn vào Actions bấm Run workflow thủ công.
+
+> ⚠️ **GitHub Actions free (repo private)** = 2000 phút/tháng. Keepa free (1 token/phút) khiến crawler chờ token lâu (tính vào thời gian chạy). Nếu hết phút: để repo public (Actions không giới hạn) hoặc nâng Keepa €49 (20 token/phút).
+
 ## 8. Cấu trúc thư mục
 
 ```

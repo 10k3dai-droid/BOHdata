@@ -2,6 +2,7 @@
 // Hỗ trợ 3 mode: keyword | category | best_sellers.
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { triggerDiscoverWorkflow } from "@/lib/githubDispatch";
 import type { DiscoverFilters } from "@/lib/types";
 
 function toNum(v: unknown): number | null {
@@ -43,7 +44,10 @@ export async function POST(req: Request) {
       .single();
     if (error) throw error;
 
-    return NextResponse.json({ data });
+    // Kích hoạt crawler cloud (GitHub Actions) chạy job ngay — nếu đã cấu hình token/repo.
+    const dispatch = await triggerDiscoverWorkflow();
+
+    return NextResponse.json({ data, dispatch });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Lỗi không xác định";
     return NextResponse.json({ error: msg }, { status: 500 });
