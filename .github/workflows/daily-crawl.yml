@@ -1,0 +1,43 @@
+# Crawl snapshot toàn bộ ASIN mỗi ngày — chạy trên máy ảo GitHub (không cần PC).
+# Lịch: 00:00 UTC = 07:00 sáng giờ VN. Cũng chạy tay được (workflow_dispatch).
+name: Daily crawl
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 00:00 UTC = 07:00 VN mỗi ngày
+  workflow_dispatch: {} # cho phép bấm chạy tay trên tab Actions
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350 # đủ dài cho Keepa chờ token (tối đa ~6h)
+    defaults:
+      run:
+        working-directory: crawler
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: crawler/requirements.txt
+
+      - name: Cài dependencies
+        run: pip install -r requirements.txt
+
+      - name: Chạy crawler (snapshot + discover job pending)
+        run: python main.py --with-discover
+        env:
+          KEEPA_API_KEY: ${{ secrets.KEEPA_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+
+      - name: Upload log (khi lỗi để debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crawler-logs
+          path: crawler/logs/
+          if-no-files-found: ignore
+          retention-days: 7

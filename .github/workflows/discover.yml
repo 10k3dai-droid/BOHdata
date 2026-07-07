@@ -1,0 +1,36 @@
+# Chạy discover job pending (do web tạo) trên máy ảo GitHub — không cần PC.
+# Kích hoạt:
+#   - workflow_dispatch: bấm tay trên tab Actions.
+#   - repository_dispatch (type=run-discover): web gọi GitHub API để chạy ngay khi bấm "Tìm".
+name: Run discover
+
+on:
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [run-discover]
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: crawler
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: crawler/requirements.txt
+
+      - name: Cài dependencies
+        run: pip install -r requirements.txt
+
+      - name: Chạy discover job pending
+        run: python main.py --only-discover
+        env:
+          KEEPA_API_KEY: ${{ secrets.KEEPA_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
